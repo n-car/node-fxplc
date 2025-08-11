@@ -49,6 +49,7 @@
   "exports": {
     ".": {
       "import": "./lib/index.js",
+      "require": "./lib/index.cjs.js",
       "types": "./index.d.ts"
     }
   },
