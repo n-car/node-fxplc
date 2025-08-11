@@ -1,0 +1,17 @@
+{
+  "name": "node-fxplc",
+  "version": "0.1.0",
+  "description": "Libreria Node.js per comunicazione PLC FX (porting da Python)",
+  "types": "index.d.ts",
+  "main": "lib/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-modules -e \"import('fs').then(fs=>{fs.readdirSync('test').filter(f=>f.endsWith('.test.js')).forEach(f=>{import('./test/'+f)});});\""
+  },
+  "keywords": ["plc", "fx", "mitsubishi", "automation", "nodejs"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "serialport": "^11.0.0"
+  }
+}

@@ -1,0 +1,26 @@
+# Node
+node_modules/
+.npm-debug.log*
+package-lock.json
+
+# IDE / Editor
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env / Secrets
+.env
+.env.*
+
+# Build artifacts
+dist/
+dist-types/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.swp
