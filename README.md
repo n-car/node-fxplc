@@ -34,6 +34,24 @@ Enable logs by setting environment variable (PowerShell):
 $env:DEBUG = "fxplc:*"; node yourscript.mjs
 ```
 
+## Usage in ESM and CommonJS
+
+This package supports both ESM (`import`) and CommonJS (`require`) consumers. Use the appropriate syntax for your project type:
+
+### ESM (import)
+```js
+import { FXPLCClient, TransportTCP, TransportSerial } from 'node-fxplc';
+// ...your code
+```
+
+### CommonJS (require)
+```js
+const { FXPLCClient, TransportTCP, TransportSerial } = require('node-fxplc');
+// ...your code
+```
+
+Both entrypoints provide the same API and typings. See below for detailed usage examples.
+
 ## Features (current)
 - Low-level MELSEC FX serial frame protocol (hex payload + checksum)
 - Read / write single bit & forced coil (ON/OFF)
