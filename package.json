@@ -1,15 +1,48 @@
 {
   "name": "node-fxplc",
   "version": "0.1.0",
-  "description": "Libreria Node.js per comunicazione PLC FX (porting da Python)",
+  "description": "Node.js library for low-level Mitsubishi FX (MELSEC) framed protocol communication",
   "types": "index.d.ts",
   "main": "lib/index.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-modules -e \"import('fs').then(fs=>{fs.readdirSync('test').filter(f=>f.endsWith('.test.js')).forEach(f=>{import('./test/'+f)});});\""
+    "test": "node -e \"import('fs').then(fs=>{fs.readdirSync('test').filter(f=>f.endsWith('.test.js')).forEach(f=>{import('./test/'+f)});});\"",
+    "prepare": "npm run build:types || echo skipping",
+    "lint": "echo 'no linter configured'",
+    "release:patch": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags"
   },
-  "keywords": ["plc", "fx", "mitsubishi", "automation", "nodejs"],
-  "author": "",
+  "keywords": ["plc", "fx", "mitsubishi", "automation", "nodejs", "melsec", "serial", "rs422"],
+  "author": "n-car",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-car/node-fxplc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/n-car/node-fxplc/issues"
+  },
+  "homepage": "https://github.com/n-car/node-fxplc#readme",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/n-car"
+    }
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./index.d.ts"
+    }
+  },
   "license": "MIT",
   "dependencies": {
     "serialport": "^11.0.0"
