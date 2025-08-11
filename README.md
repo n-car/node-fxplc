@@ -1,5 +1,10 @@
 # node-fxplc
 
+[![npm version](https://img.shields.io/npm/v/node-fxplc.svg)](https://www.npmjs.com/package/node-fxplc)
+[![npm downloads](https://img.shields.io/npm/dm/node-fxplc.svg)](https://www.npmjs.com/package/node-fxplc)
+[![license](https://img.shields.io/npm/l/node-fxplc.svg)](LICENSE)
+[![GitHub tag](https://img.shields.io/github/v/tag/n-car/node-fxplc?label=git-tag)](https://github.com/n-car/node-fxplc/releases)
+
 Node.js library for communication with Mitsubishi FX PLCs using low-level MELSEC FX series serial protocol.
 
 **Note:** it is not the same as Non-Protocol Communication (or D8120) as described in FX Series Programmable Controllers manuals.
