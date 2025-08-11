@@ -137,6 +137,9 @@ plc.close();
 ### Enabling debug logs
 Install `debug` and set `DEBUG=fxplc:*` env variable. Logs show TX/RX hex frames.
 
+## License
+Released under the MIT License. See the `LICENSE` file for full text.
+
 ---
 Next focus: transport robustness, CLI, integration tests, richer docs.
 
