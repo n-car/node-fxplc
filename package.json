@@ -1,6 +1,6 @@
 {
   "name": "node-fxplc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node.js library for low-level Mitsubishi FX (MELSEC) PLC framed protocol communication",
   "types": "index.d.ts",
   "main": "lib/index.js",
@@ -12,7 +12,16 @@
     "release:patch": "npm version patch && git push && git push --tags",
     "release:minor": "npm version minor && git push && git push --tags"
   },
-  "keywords": ["plc", "fx", "mitsubishi", "automation", "nodejs", "melsec", "serial", "rs422"],
+  "keywords": [
+    "plc",
+    "fx",
+    "mitsubishi",
+    "automation",
+    "nodejs",
+    "melsec",
+    "serial",
+    "rs422"
+  ],
   "author": "n-car",
   "repository": {
     "type": "git",
