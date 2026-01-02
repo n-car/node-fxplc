@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## [0.1.6] - 2025-08-12
+## [0.1.6] - 2026-01-02
 ### Changed
 - Refactor FXPLCClient ESM source and simplify lazy debug loader.
 

@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.1.6 (2025-08-12)
+## v0.1.6 (2026-01-02)
 Internal refactor to clean up ESM source layout and simplify the lazy debug loader. No public API changes expected.
 
 ## v0.1.5 (2025-08-12)
