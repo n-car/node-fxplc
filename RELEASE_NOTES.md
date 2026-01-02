@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.1.6 (2025-08-12)
+Internal refactor to clean up ESM source layout and simplify the lazy debug loader. No public API changes expected.
+
+## v0.1.5 (2025-08-12)
+Fix for lazy debug loading so it works in both ESM and CommonJS environments.
+
+## v0.1.4 (2025-08-12)
+Build packaging update: ESM/CJS outputs are now built into `dist/`, with updated exports and README usage guidance. Obsolete CommonJS entry files were removed from `lib/`.
+
+## v0.1.3 (2025-08-11)
+Fix CommonJS `require()` resolution by renaming `index.cjs.js` to `index.cjs` and updating exports.
+
+## v0.1.2 (2025-08-11)
+Add CommonJS `require()` compatibility via a dedicated `index.cjs.js` entrypoint and package exports mapping.
+
+## v0.1.1 (2025-08-11)
+Docs/metadata update: README badges + license section, new `LICENSE`, `CHANGELOG`, and `RELEASE_NOTES`, plus enriched package metadata.
+
 ## v0.1.0 (2025-08-11)
 Early pre-release (FX framed protocol client)
 
