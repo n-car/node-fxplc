@@ -1,14 +1,16 @@
 {
   "name": "node-fxplc",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Node.js library for low-level Mitsubishi FX (MELSEC) PLC framed protocol communication",
+  "type": "commonjs",
   "types": "index.d.ts",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "scripts": {
     "build:esm": "tsc --project tsconfig.json",
     "build:cjs": "tsc --project tsconfig.cjs.json",
-    "build": "npm run build:esm && npm run build:cjs",
+    "build:meta": "node scripts/write-package-types.js",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:meta",
     "test": "node -e \"import('fs').then(fs=>{fs.readdirSync('test').filter(f=>f.endsWith('.test.js')).forEach(f=>{import('./test/'+f)});});\"",
     "prepare": "npm run build",
     "lint": "echo 'no linter configured'",
@@ -46,15 +48,23 @@
   "files": [
     "dist/esm/",
     "dist/cjs/",
+    "index.d.mts",
+    "index.d.cts",
     "index.d.ts",
+    "scripts/write-package-types.js",
     "README.md",
     "LICENSE"
   ],
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./index.d.ts"
+      "import": {
+        "types": "./index.d.mts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./dist/cjs/index.js"
+      }
     }
   },
   "license": "MIT",
