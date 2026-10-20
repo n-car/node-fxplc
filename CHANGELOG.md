@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented here.
 
+## [0.1.8] - 2026-10-20
+### Fixed
+- Correct classic Mitsubishi FX addressing for octal X/Y labels, special M/D registers, counter contacts, and 32-bit counters.
+- Validate device ranges, numeric spans, and the 1–64-byte transfer limit before transmission.
+- Split batch operations using actual contiguous byte addresses and validate every value before writing.
+- Reject malformed, oversized, unexpected, and buffered replies without replaying commands.
+### Changed
+- The legacy `retry` option remains accepted but no longer replays commands. Ambiguous failures permanently invalidate the client and require a new client with a clean transport.
+### Added
+- Manual-conformance tests and documentation of the supported classic FX register profile and protocol limitations.
+
 ## [0.1.6] - 2026-01-02
 ### Changed
 - Refactor FXPLCClient ESM source and simplify lazy debug loader.

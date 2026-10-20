@@ -1,6 +1,6 @@
 {
   "name": "node-fxplc",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Node.js library for low-level Mitsubishi FX (MELSEC) PLC framed protocol communication",
   "type": "commonjs",
   "types": "index.d.ts",

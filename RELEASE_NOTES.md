@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.1.8 (2026-10-20)
+
+Correct classic Mitsubishi FX device addressing, including octal X/Y labels, special M/D registers, counter contacts, and 32-bit counters. Validate device and transfer boundaries, and split batch requests at 64 bytes using actual contiguous byte addresses.
+
+Reject malformed, ambiguous, and buffered replies. The legacy `retry` option remains accepted but commands are no longer automatically replayed. After an ambiguous failure, create a new client with a new clean transport before continuing; a valid NAK leaves the synchronized client usable.
+
+Add manual-conformance tests and document the supported register profile. Validation uses simulated peers and manual examples; physical PLC validation remains pending.
+
 ## v0.1.6 (2026-01-02)
 Internal refactor to clean up ESM source layout and simplify the lazy debug loader. No public API changes expected.
 
