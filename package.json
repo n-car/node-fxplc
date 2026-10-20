@@ -1,6 +1,6 @@
 {
   "name": "node-fxplc",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Node.js library for low-level Mitsubishi FX (MELSEC) PLC framed protocol communication",
   "type": "commonjs",
   "types": "index.d.ts",
@@ -12,6 +12,8 @@
     "build:meta": "node scripts/write-package-types.js",
     "build": "npm run build:esm && npm run build:cjs && npm run build:meta",
     "test": "node --test test/*.test.js",
+    "test:package": "node test/package-exports.mjs",
+    "prepublishOnly": "npm run build && npm test && npm run test:package",
     "prepare": "npm run build",
     "lint": "echo 'no linter configured'",
     "release:patch": "npm version patch && git push && git push --tags",
@@ -53,6 +55,9 @@
     "index.d.ts",
     "scripts/write-package-types.js",
     "README.md",
+    "CHANGELOG.md",
+    "RELEASE_NOTES.md",
+    "ROADMAP.md",
     "LICENSE"
   ],
   "exports": {

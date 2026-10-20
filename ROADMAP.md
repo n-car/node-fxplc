@@ -1,83 +1,45 @@
 # Roadmap
 
-Detailed progression and planned work for node-fxplc.
+Planned work for node-fxplc after 0.2.0. The [README](./README.md) describes the
+current API and supported profiles; the [changelog](./CHANGELOG.md) records
+completed changes. Items below are goals, not support commitments.
 
-## Implemented
-- Frame build/parse (STX/ETX + hex payload + checksum)
-- Bit, single value, batch read/write helpers
-- Raw byte read/write
-- Basic TCP transport (optional delayed start flush, simple auto-reconnect hook via `setReconnect`)
-- Basic Serial transport (7E1 settings typical for FX, buffer accumulator)
-- Locking to serialize protocol frames
-- Timeouts & simple retry wrapper
-- Checksum util & unit tests (limited scope)
-- Base structures (RegisterDef, NumberType, Commands)
-- Custom errors
-- Core FXPLCClient (main methods; no advanced serial flush yet)
-- Protocol utilities (checksum)
-- Basic unit tests (checksum, registerdef, readBit parsing)
+## Hardware validation
 
-## In Progress / Planned
-- Harden reconnect / transient error handling
-- Real integration tests (physical FX PLC over RS232 / TCP gateway)
-- Example CLI
-- Detailed API documentation
-- Extended number types & block optimizations
-- TypeScript typings / JSDoc enrichment (partially done via index.d.ts)
-- Logging improvements & metrics hooks
-- Advanced serial flushing / line discipline tweaks
-- Extensive validation & edge-case coverage
+- Validate the bounded classic register profile on the intended FX0N-60MR/RS422
+  setup and additional documented FX targets.
+- Extend read-only acceptance to other CPU versions, serial converters and TCP
+  gateways, recording the model, interface, serial parameters and tested ranges.
+- Validate device writes, classic restore and native monitor on suitable test
+  equipment before claiming hardware support for those workflows.
+- Establish repeatable integration procedures that keep reads separate from
+  explicitly authorized mutations.
 
-## Hardware / Cabling (Planned Documentation)
-Documentation to be added (and moved to a dedicated HARDWARE.md later) covering:
+## Documentation and tooling
 
-### FX RS422 Mini-DIN (Adapter) to USB RS422 Converter (Typical)
-Most FX series (and many clones) expose RS422 differential pairs. A typical 6-pin Mini-DIN breakout (via Mitsubishi programming cable) maps to differential pairs labeled SD+, SD-, RD+, RD-. Consult your specific cable datasheet.
+- Add a method-by-method API reference covering types, callback overloads,
+  error codes and custom transport requirements.
+- Add a CLI for information, register reads, backup and comparison, with explicit
+  target/profile selection.
+- Document verified cabling, converter settings and troubleshooting for tested
+  hardware. Pinouts and electrical behavior must be specific to the actual
+  device and cable.
+- Add a transport benchmark harness and evaluate useful logging/metrics hooks.
+- Keep package entrypoint checks and TypeScript declarations aligned with each
+  release.
 
-Reference signal roles:
-- SD+ / SD- : PLC transmit pair (data PLC -> PC)
-- RD+ / RD- : PLC receive pair (data PC -> PLC)
-- SG (Signal Ground) : Common reference
+## Future investigation
 
-Example wiring summary (to a USB RS422 adapter):
-| PLC Signal | Adapter Side |
-|------------|--------------|
-| SD+        | RX+          |
-| SD-        | RX-          |
-| RD+        | TX+          |
-| RD-        | TX-          |
-| SG (GND)   | GND          |
+- Evaluate additional CPU/memory profiles only when supported by protocol
+  documentation and repeatable hardware evidence.
+- Explore helpers for structured register groups and bitfields without changing
+  the documented device maps.
+- Evaluate host-managed reconnection helpers that create a fresh client and
+  transport after failure, without automatically replaying commands.
 
-Some inexpensive clones merge SD/RD (half‑duplex); if so, a 2-wire (A/B) configuration may appear – this library expects full-duplex timing but usually still works; increase retries if frames are dropped.
+## Contributions
 
-### Electrical Notes
-- Use a proper isolated converter where possible to avoid ground loops.
-- Keep cable length moderate; RS422 supports long distances, but noise can corrupt frames—enable retry logic.
-- Maintain 7E1 serial parameters matching PLC config.
-
-### Future Additions
-- HARDWARE.md with photos / ASCII diagrams
-- Tested converter list
-- Troubleshooting table (noise, echo, missing ACK)
-
-If you have confirmed pinouts or schematics for clone units, please open an issue so we can consolidate accurate diagrams.
-
-## Nice-to-Have / Future Ideas
-- TypeScript migration or automated d.ts generation with JSDoc + tsc
-- Benchmark harness (latency / throughput per transport)
-- Optional pooled client factory
-- Health check / watchdog utilities
-- Higher-level abstractions (bitfield mappers, structured register groups)
-- CLI: scan / quick read / batch script runner
-
-## Contribution Notes
-Prefer small, focused PRs. Please include:
-- Clear description & rationale
-- Tests (unit/integration) where feasible
-- No breaking changes to existing public API without discussion
-
-## Changelog Policy (future)
-Once reaching v0.2.0 a CHANGELOG.md will track user-facing changes.
-
----
-Feedback & hardware test reports are extremely valuable at this pre-release stage.
+Keep changes focused and include the relevant tests or validation evidence.
+Hardware reports should identify the PLC model, interface, baud rate, tested
+operations and observed errors. Do not include PLC program images, credentials
+or other private device data in public reports.

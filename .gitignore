@@ -18,6 +18,10 @@ dist/
 dist-types/
 coverage/
 
+# Local PLC memory backups and verification reports.
+*.fxplcbk
+/test-results/
+
 # Logs
 logs/
 *.log

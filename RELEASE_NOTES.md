@@ -1,77 +1,53 @@
 # Release Notes
 
-## v0.1.8 (2026-10-20)
+## v0.2.0 (2026-10-20)
 
-Correct classic Mitsubishi FX device addressing, including octal X/Y labels, special M/D registers, counter contacts, and 32-bit counters. Validate device and transfer boundaries, and split batch requests at 64 bytes using actual contiguous byte addresses.
+This release adds E0 reads and PLC maintenance workflows while retaining the
+classic device read/write API. Install with `npm install node-fxplc@0.2.0`.
 
-Reject malformed, ambiguous, and buffered replies. The legacy `retry` option remains accepted but commands are no longer automatically replayed. After an ambiguous failure, create a new client with a new clean transport before continuing; a valid NAK leaves the synchronized client usable.
+### New capabilities
 
-Add manual-conformance tests and document the supported register profile. Validation uses simulated peers and manual examples; physical PLC validation remains pending.
+- Explicit 20-bit E0 raw reads through `readExtendedBytes`.
+- CPU/parameter information, two-pass binary backup, offline image inspection
+  and comparison, and live comparison through the ESM and CommonJS entrypoints.
+- An explicitly selected FX3U-compatible 8K read-only maintenance profile with
+  CPU/capacity checks and profile-tagged v2 image containers.
+- Classic restore with a pre-write backup hook, changed-byte writes, readback
+  verification and retained failure diagnostics.
+- Classic native monitor access with an explicitly supplied target layout.
 
-## v0.1.6 (2026-01-02)
-Internal refactor to clean up ESM source layout and simplify the lazy debug loader. No public API changes expected.
+See the [maintenance guide](./README.md#maintenance-and-e0-reads) for examples,
+profile selection, image compatibility and workflow limits.
 
-## v0.1.5 (2025-08-12)
-Fix for lazy debug loading so it works in both ESM and CommonJS environments.
+### Upgrade guidance
 
-## v0.1.4 (2025-08-12)
-Build packaging update: ESM/CJS outputs are now built into `dist/`, with updated exports and README usage guidance. Obsolete CommonJS entry files were removed from `lib/`.
+Commands are sent once. The historical `retry` option remains accepted, but
+replies are never recovered by replaying a command. Closed or failed TCP/serial
+transports must be replaced; `setReconnect` remains accepted for source
+compatibility and does not reopen them. Pending connections are cancelled on
+close or timeout so that a late connection cannot send a queued write.
 
-## v0.1.3 (2025-08-11)
-Fix CommonJS `require()` resolution by renaming `index.cjs.js` to `index.cjs` and updating exports.
+Custom transports must expose a valid synchronous `availableBytes` getter to
+use E0 or maintenance operations. A timeout, ambiguous reply or maintenance
+failure requires a new client and a new clean transport. See
+[timeouts and retries](./README.md#timeouts--retries) for the full contract.
 
-## v0.1.2 (2025-08-11)
-Add CommonJS `require()` compatibility via a dedicated `index.cjs.js` entrypoint and package exports mapping.
+Classic v1 images with D8001 family prefix `24` and no D8102 capacity evidence
+are rejected. This prevents treating an unknown allocation as a complete 8K
+image. Other supported classic v1 images remain readable. The extended
+maintenance profile supports only 8K reads; it does not add E1, extended restore,
+firmware access or Ladder compilation. Its read-only restriction does not
+disable the client's separate classic device-write methods.
 
-## v0.1.1 (2025-08-11)
-Docs/metadata update: README badges + license section, new `LICENSE`, `CHANGELOG`, and `RELEASE_NOTES`, plus enriched package metadata.
+### Validation
 
-## v0.1.0 (2025-08-11)
-Early pre-release (FX framed protocol client)
+Simulated protocol tests exercise maintenance workflows, failure handling,
+transport lifecycle and both package entrypoints. On 20 October 2026, the built
+CommonJS package also completed 1,029 read requests on one FX3U-compatible 48MR/8K
+clone, including two-pass backup and live comparison. Writes, restore and native
+monitor remain unverified on hardware. See the
+[hardware acceptance report](./README.md#read-only-hardware-acceptance) for the
+exact scope.
 
-### Summary
-Initial publication of a Node.js library implementing the low-level framed MELSEC FX (FX0N/FX1N style) protocol. Includes core client, TCP and Serial transports, batch helpers, register parsing and TypeScript typings. Intended for experimentation and hardware feedback; not production-hardened yet.
-
-### Added
-- FXPLCClient: bit read/write, word/number read/write, batch operations, raw byte access
-- Consecutive register coalescing in batch read/write
-- Bit force commands (FORCE ON / OFF)
-- TCP transport (flush delay, simple auto-reconnect toggle)
-- Serial transport (7E1 settings, buffer accumulator)
-- BufferAccumulator for incremental framed reads
-- Per-operation timeout + simple retry policy
-- Frame builder/parser (STX, ETX, hex payload, checksum)
-- Error classes: NoResponseError, ResponseMalformedError, NotSupportedCommandError, NotConnectedError
-- Numeric type converters (signed/unsigned word/dword, float)
-- Mock client + Null transport
-- Type definitions (index.d.ts)
-- Initial docs: README, ROADMAP, CHANGELOG
-- Basic unit tests (checksum, register parsing, bit read frame)
-
-### Limitations
-- Advanced reconnect/backoff not implemented
-- Limited real hardware validation
-- No CLI yet
-- Minimal edge‑case coverage
-- Serial path tested only on a small sample
-- Lacks extended block optimizations & full API reference
-
-### Quick Example
-```js
-import { FXPLCClient, TransportSerial } from 'node-fxplc';
-const transport = new TransportSerial({ path: 'COM3', baudRate: 9600 });
-const plc = new FXPLCClient(transport, { retry: { count: 3, delayMs: 100 } });
-const bit = await plc.readBit('M0');
-await plc.writeBit('M10', true);
-const values = await plc.batchRead(['D100','D101']);
-plc.close();
-```
-
-### Compatibility
-Should also work with many FX‑compatible clone PLCs over RS422 if they implement the same framed command set (7E1). Enable retries if responses are intermittent.
-
-### Roadmap
-See ROADMAP.md for upcoming work (reconnect hardening, integration tests, CLI, extended docs).
-
-### Feedback
-Please report: PLC model, interface type (RS422/RS232/TCP gateway), baud rate, anomalies (timeouts, unexpected NAK, checksum errors).
+The [changelog](./CHANGELOG.md) records earlier releases and the complete change
+history. Planned work is tracked in the [roadmap](./ROADMAP.md).
