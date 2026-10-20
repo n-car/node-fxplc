@@ -56,21 +56,40 @@ Both entrypoints provide the same API and typings. See below for detailed usage 
 - Low-level MELSEC FX serial frame protocol (hex payload + checksum)
 - Read / write single bit & forced coil (ON/OFF)
 - Read / write signed word and generic numeric types via converters
-- Batch read/write (auto-coalesces consecutive addresses)
-- Raw byte read/write access for advanced use
+- Batch read/write (coalesces contiguous byte spans, splitting at 64 bytes)
+- Raw byte read/write access for advanced use (1–64 bytes per command)
 - TCP & Serial transports with buffer accumulation & timeouts
-- Simple retry + operation-level timeout
+- Command timeout with terminal invalidation after ambiguous failures
 - Event emitter (error / connect / disconnect)
 
 ## Protocol Notes
 This is NOT the "Non-Protocol Communication" (D8120) mode. It targets the classic hex framed ASCII protocol (FX0N/FX1N style). Serial defaults: 7 data bits, even parity, 1 stop bit (7E1), commonly 9600 baud. Verify your PLC parameters.
 
-Compatibility note: The protocol layer is electrical-transport agnostic; it should also work with many FX-compatible clone PLCs exposing an RS422 port, provided they implement the same framed command set. Use a proper RS422↔USB (or RS422↔RS232) converter and match serial parameters (7E1, baud rate). Timing and response behaviors may vary between clones—enable retries if needed and report any incompatibilities.
+Compatibility note: The protocol layer is electrical-transport agnostic. Use a proper RS422↔USB (or RS422↔RS232) converter and match serial parameters (7E1, baud rate). The address profile below is verified against the classic Mitsubishi manual; individual CPU capabilities, permissions, converter direction control, and clone compatibility require separate validation.
 
-## Supported Registers (initial)
-- Bit areas (e.g. M, X, Y) via `readBit` / `writeBit`
-- Data registers (e.g. D) via numeric read/write helpers
-Parsing is handled by `RegisterDef.parse('D100')`. Unsupported / unknown areas will throw until implemented.
+## Supported register profile
+
+The bounded classic profile follows Mitsubishi **FX-232AW BT5096-C**, tables 1–7 (PDF pages 18–27, counting the cover as page 1). It is not a universal FX CPU profile: a particular CPU may implement fewer devices or restrict writes to special registers.
+
+The intended FX0N-60MR setup and RS232-connected clone remain unverified on hardware. These corrections establish the shared classic protocol map; they do not certify either device's full capacity, firmware behavior, or electrical connection.
+
+| Devices | Bit contacts / FORCE | Numeric values |
+| --- | --- | --- |
+| S0–S999 | Yes | No |
+| X0–X177, Y0–Y177 (octal labels) | Yes | No |
+| T0–T255 | Yes | 16-bit slots |
+| M0–M1023, M8000–M8255 | Yes | No |
+| C0–C199 | Yes | 16-bit slots |
+| C200–C255 | Yes | 32-bit slots, starting at `0x0C00` |
+| D0–D511, D8000–D8255 | No | 16-bit slots |
+
+Parsing is strict: `RegisterDef.parse('X100')` means octal X100 (ordinal 64); `X80`, trailing text, and devices outside this profile are rejected. `new RegisterDef('X', 100)` uses the same device-label convention. `getBitImageAddress()`, `getForceAddress()`, and `getDataAddress(size = 2)` expose the checked maps, including the separate M8000/D8000 regions.
+
+The selected numeric converter determines the number of bytes read or written. A 32-bit D value occupies two word slots; `C200` already has a four-byte stride. Selecting a 16-bit converter for C200–C255 accesses its low word. Numeric operations cannot cross the end of a documented segment. The Float converter provides IEEE-754 byte conversion; it does not establish that a particular CPU/program stores floats in that register.
+
+`readBit('D9')` is rejected rather than interpreting it as bit 9 of D0. Read a numeric D value and mask the intended bit explicitly. Separate T/C OUT and RST coil images are not exposed by these contact helpers.
+
+READ and WRITE accept **1–64 bytes** (manual PDF pages 10–12). Batch operations validate all registers and values before transmission, coalesce only contiguous byte spans, and split requests at 64 bytes. For example, 32-bit `D0` and `D1` overlap and therefore produce separate requests; 32-bit `C200` and `C201` are contiguous. Batches stop at the first failed request and are not atomic: already acknowledged writes remain applied.
 
 ## Error Classes
 Exposed error types (see `errors.js`):
@@ -81,10 +100,18 @@ Exposed error types (see `errors.js`):
 Use instanceof checks for granular handling.
 
 ## Timeouts & Retries
-Client option `timeoutMs` controls per-operation timeout. Retry policy via `retry: { count, delayMs }` (default 1 attempt). Example:
+Client option `timeoutMs` bounds each command after it acquires the transport lock. Commands execute once, including mutations: an absent reply does not prove that a write was not applied. The historical `retry` option remains accepted for API compatibility but no longer causes replay.
+
+A timeout, transport failure, malformed frame, unexpected response kind, or incorrect READ length closes and permanently invalidates the client. Create a **new client with a new clean transport** before continuing. A valid NAK reports rejection and leaves the synchronized client usable. Example:
 ```js
-const plc = new FXPLCClient(transport, { retry: { count: 3, delayMs: 150 }, timeoutMs: 2500 });
+const plc = new FXPLCClient(transport, { timeoutMs: 2500 });
 ```
+
+Built-in transports expose a synchronous `availableBytes` getter. The client rejects buffered input before transmission and trailing bytes after a complete reply, including duplicate ACKs; the serial adapter no longer discards unexplained input between commands. Custom transports should expose the same getter and preserve their receive buffer across requests. It is optional for API compatibility, but without it the client cannot detect residual bytes hidden inside a custom transport.
+
+The protocol has no transaction identifier. A delayed duplicate that arrives only after a later command has already been sent can be indistinguishable from that command's real reply; buffered-input checks cannot solve this protocol limitation.
+
+Protocol tests use simulated peers and independently transcribed manual examples; no physical PLC is contacted by `npm test`. Run `npm run build` to regenerate the ESM and CommonJS package outputs.
 
 ## Auto Reconnect (TCP)
 Enable simple reconnect:

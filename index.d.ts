@@ -3,6 +3,7 @@
 
 import { EventEmitter } from 'events';
 
+/** Compatibility option: commands are no longer automatically replayed. */
 export interface RetryOptions { count: number; delayMs: number; }
 
 export interface FXPLCClientOptions {
@@ -28,6 +29,8 @@ export interface NumberTypeConverter {
 }
 
 export interface TransportLike {
+  /** Optional legacy compatibility; provide this for buffered-input guards. */
+  readonly availableBytes?: number;
   write(data: Buffer): Promise<void> | void;
   read(size: number): Promise<Buffer>;
   close?(): void;
@@ -35,6 +38,7 @@ export interface TransportLike {
 }
 
 export class TransportTCP implements TransportLike {
+  readonly availableBytes: number;
   constructor(opts: { host: string; port: number; timeout?: number; flushDelay?: number });
   setReconnect(enabled: boolean, delayMs?: number): void;
   connect(): Promise<void>;
@@ -44,6 +48,7 @@ export class TransportTCP implements TransportLike {
 }
 
 export class TransportSerial implements TransportLike {
+  readonly availableBytes: number;
   constructor(opts: { path: string; baudRate?: number; timeout?: number });
   write(data: Buffer): Promise<void>;
   read(size: number): Promise<Buffer>;
@@ -51,6 +56,7 @@ export class TransportSerial implements TransportLike {
 }
 
 export class TransportNull implements TransportLike {
+  readonly availableBytes: number;
   write(data: Buffer): Promise<void>;
   read(size: number): Promise<Buffer>;
   close(): void;
@@ -64,6 +70,8 @@ export class RegisterDef {
   constructor(type: RegisterTypeName, num: number);
   toString(): string;
   getBitImageAddress(): [number, number];
+  getDataAddress(size?: number): number;
+  getForceAddress(): number;
   static parse(definition: string): RegisterDef;
 }
 
@@ -96,6 +104,7 @@ export class FXPLCClient extends EventEmitter {
   writeNumber(register: string | RegisterDef, value: number, cb: (err: Error | null) => void): void;
   writeNumber(register: string | RegisterDef, value: number, numberType: NumberTypeName, cb: (err: Error | null) => void): void;
   readBytes(address: number, count?: number): Promise<Buffer>;
+  readBytes(address: number, cb: (err: Error | null, value?: Buffer) => void): void;
   readBytes(address: number, count: number, cb: (err: Error | null, value?: Buffer) => void): void;
   writeBytes(address: number, data: Buffer): Promise<void>;
   writeBytes(address: number, data: Buffer, cb: (err: Error | null) => void): void;
